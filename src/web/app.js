@@ -81,6 +81,16 @@ class EURLexTradeScraperDashboard {
         });
         
         console.log('✅ All event listeners set up successfully');
+        
+        // Show serverless notice if no data is available initially
+        setTimeout(() => {
+            if (this.currentData && this.currentData.statistics.total_documents === 0) {
+                const notice = document.getElementById('serverlessNotice');
+                if (notice) {
+                    notice.style.display = 'block';
+                }
+            }
+        }, 2000);
     }
     
     async loadDashboardData() {
@@ -535,9 +545,26 @@ class EURLexTradeScraperDashboard {
             modal.hide();
             
             if (result.status === 'success' || result.status === 'up_to_date') {
-                this.showSuccess(result.message);
-                // Reload dashboard data
+                // Show detailed success message with results
+                let message = result.message;
+                if (result.new_documents > 0) {
+                    message += ` Found ${result.new_documents} new documents from ${result.from_date} to ${result.to_date}.`;
+                }
+                if (result.duration_seconds) {
+                    message += ` Completed in ${result.duration_seconds.toFixed(1)}s.`;
+                }
+                
+                this.showSuccess(message);
+                
+                // Try to reload dashboard data
                 await this.loadDashboardData();
+                
+                // If still no data (Vercel serverless issue), show helpful message
+                if (this.currentData && this.currentData.results.length === 0 && result.new_documents > 0) {
+                    setTimeout(() => {
+                        this.showSuccess(`✅ Scraping successful! Found ${result.new_documents} documents. Note: In serverless environments, data may not persist between requests. For full functionality, run locally.`);
+                    }, 2000);
+                }
             } else {
                 this.showError(result.message || 'Scraping failed');
             }

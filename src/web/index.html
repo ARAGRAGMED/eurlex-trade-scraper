@@ -140,6 +140,17 @@
                             EUR-Lex Trade Document Dashboard
                         </h2>
                         <div class="text-muted mt-1">Monitor EU antidumping and countervailing duty regulations</div>
+                        <div class="alert alert-info mt-2" style="display: none;" id="serverlessNotice">
+                            <div class="d-flex">
+                                <div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12.01" y2="8"/><polyline points="11,12 12,12 12,16 13,16"/></svg>
+                                </div>
+                                <div>
+                                    <h4 class="alert-title">Serverless Environment</h4>
+                                    <div class="text-muted">This is running on Vercel serverless functions. Data doesn't persist between requests. For full functionality with persistent data, run locally with <code>python3 src/main.py</code>.</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-auto ms-auto d-print-none">
                         <div class="btn-list">
