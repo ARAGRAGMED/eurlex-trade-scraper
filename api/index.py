@@ -58,7 +58,7 @@ matcher = None
 
 try:
     from src.matcher import EURLexTradeDocumentMatcher
-    scraper = EURLexTradeScraper(data_dir=str(Path(DATA_DIR)))
+    scraper = EURLexTradeScraper(data_dir=DATA_DIR)
     matcher = EURLexTradeDocumentMatcher()
     logger.info("Successfully imported scraper modules")
 except ImportError as e:
@@ -128,7 +128,7 @@ async def health_check():
         "platform": "Vercel",
         "version": "1.0.0",
         "timestamp": datetime.now().isoformat(),
-        "data_dir": str(Path(DATA_DIR)),
+        "data_dir": DATA_DIR,
         "scraper_available": scraper is not None and hasattr(scraper, '_load_results')
     }
 
