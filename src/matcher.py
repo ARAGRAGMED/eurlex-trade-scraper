@@ -9,7 +9,7 @@ import logging
 from typing import Dict, List, Tuple, Set
 
 # Set up logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class EURLexTradeDocumentMatcher:

@@ -67,12 +67,12 @@ class EURLexTradeScraper:
     def _initialize_data_files(self):
         """Initialize data files if they don't exist."""
         # Initialize results file
-        if not self.results_file.exists():
+        if not os.path.exists(self.results_file):
             self._save_results([])
             logger.info(f"Initialized results file: {self.results_file}")
         
         # Initialize state file
-        if not self.state_file.exists():
+        if not os.path.exists(self.state_file):
             self._save_state({
                 "last_checked_date": None,
                 "last_run": None,
@@ -83,7 +83,7 @@ class EURLexTradeScraper:
     def _load_results(self) -> List[Dict]:
         """Load existing results from JSON file."""
         try:
-            if self.results_file.exists():
+            if os.path.exists(self.results_file):
                 with open(self.results_file, 'r', encoding='utf-8') as f:
                     return json.load(f)
             return []
@@ -103,7 +103,7 @@ class EURLexTradeScraper:
     def _load_state(self) -> Dict:
         """Load application state from JSON file."""
         try:
-            if self.state_file.exists():
+            if os.path.exists(self.state_file):
                 with open(self.state_file, 'r', encoding='utf-8') as f:
                     return json.load(f)
             return {}
