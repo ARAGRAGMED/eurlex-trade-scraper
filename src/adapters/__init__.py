@@ -1,0 +1,1 @@
+# EUR-Lex API adapters
