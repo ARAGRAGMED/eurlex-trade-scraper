@@ -24,51 +24,73 @@ A comprehensive web scraper for monitoring EU trade defense regulations from EUR
 - **📈 Export Capabilities**: CSV export with filtering options
 - **🌐 Vercel Deployment**: Ready for cloud deployment
 
-## 🚀 Quick Start
+## 🚀 **Deployment & Usage**
 
-### Installation
+### **Local Development (Recommended for Full Functionality)**
+
+For complete functionality with persistent data storage:
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/ARAGRAGMED/eurlex-trade-scraper.git
 cd eurlex-trade-scraper
-
-# Create virtual environment
-python3 -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
-```
 
-### Running the Application
+# Set up environment variables
+cp env.example .env
+# Edit .env with your EUR-Lex credentials
 
-#### Web Dashboard
-```bash
-# Start the web server
-cd src
-python3 main.py
-
-# Visit http://localhost:8000
-```
-
-#### Command Line Interface
-```bash
-# Scrape current year documents
+# Run the scraper
 python3 run_scraper.py --force-current-year
 
-# Clean duplicate documents
-python3 run_scraper.py --clean-duplicates
-
-# Show statistics
-python3 run_scraper.py --stats
-
-# Export to CSV
-python3 run_scraper.py --export-csv results.csv
-
-# Show help
-python3 run_scraper.py --help
+# Start the web dashboard
+python3 src/main.py
+# Open http://localhost:8000
 ```
+
+**✅ Local Benefits:**
+- Persistent data storage in `data/` folder
+- Full scraping history maintained
+- No data loss between runs
+- Complete functionality
+
+### **Vercel Deployment (Limited Functionality)**
+
+The project can be deployed to Vercel, but with **significant limitations**:
+
+**⚠️ Vercel Limitations:**
+- Data is stored in `/tmp` directory (temporary)
+- Data gets cleared between function invocations
+- No persistent storage between requests
+- Dashboard shows 0 results after page refresh
+
+**🔧 Vercel Setup:**
+```bash
+# Deploy to Vercel
+vercel --prod
+
+# Environment variables in Vercel dashboard:
+EURLEX_USERNAME=your_username
+EURLEX_PASSWORD=your_password
+```
+
+**📊 Vercel Use Case:**
+- Testing the scraper functionality
+- Demonstrating the matching logic
+- Temporary data viewing
+- **NOT suitable for production data collection**
+
+### **Why This Limitation Exists**
+
+Vercel serverless functions:
+- Cannot write to persistent file systems
+- Only have access to `/tmp` (temporary storage)
+- Get cleared between function calls
+- Are stateless by design
+
+**💡 Recommendation:** Use Vercel for testing/demo, use local deployment for production data collection.
 
 ## 📊 Dashboard Features
 

@@ -9,7 +9,7 @@ import logging
 from typing import Dict, List, Tuple, Set
 
 # Set up logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 class EURLexTradeDocumentMatcher:
@@ -23,7 +23,10 @@ class EURLexTradeDocumentMatcher:
             "antidumping", "anti-dumping", "countervailing duty", "CVD", 
             "anti-subsidy", "safeguard", "regulation", "decision", "review", 
             "sunset review", "circumvention", "antitrust", "sanctions",
-            "trade defence", "trade defense", "dumping", "subsidy"
+            "trade defence", "trade defense", "dumping", "subsidy",
+            # Broader terms that might appear in titles
+            "trade", "import", "export", "customs", "tariff", "duty", "levy",
+            "investigation", "proceeding", "measure", "action", "procedure"
         }
         
         # Group B: Products (phosphate and fertilizers)
@@ -31,7 +34,9 @@ class EURLexTradeDocumentMatcher:
             "phosphate", "phosphate rock", "phosphoric acid", "fertilizer", 
             "fertiliser", "DAP", "MAP", "TSP", "SSP", "diammonium phosphate",
             "monoammonium phosphate", "triple superphosphate", "single superphosphate",
-            "HS25", "HS31", "3103", "3105", "mineral fertilizer", "chemical fertilizer"
+            "HS25", "HS31", "3103", "3105", "mineral fertilizer", "chemical fertilizer",
+            # Broader terms
+            "chemical", "mineral", "agricultural", "product", "goods", "commodity"
         }
         
         # Group C: Places and Companies
@@ -39,7 +44,9 @@ class EURLexTradeDocumentMatcher:
             "Morocco", "OCP", "Mosaic", "Nutrien", "Yara", "ICL", "Maaden", 
             "Eurochem", "Phosagro", "CF Industries", "CFIndustries", 
             "Jordan Phosphate", "JPMC", "Moroccan", "Israel Chemicals",
-            "PhosAgro", "EuroChem", "Nutrien Ltd", "The Mosaic Company"
+            "PhosAgro", "EuroChem", "Nutrien Ltd", "The Mosaic Company",
+            # Broader geographic terms
+            "European", "EU", "Union", "Commission", "Council", "Parliament"
         }
     
     def _normalize_text(self, text: str) -> str:
@@ -109,25 +116,30 @@ class EURLexTradeDocumentMatcher:
         - Groups A (Measures) and B (Products) are OPTIONAL (at least one required)
         
         Args:
-            document: EUR-Lex document with fields like TI (title), TX (text), etc.
+            document: EUR-Lex document with fields like TI (title), TE (text excerpt), etc.
         
         Returns:
             Tuple of (is_match, match_details)
         """
         
-        # Combine searchable text fields
+        # Combine searchable text fields - use only fields that actually exist in web-scraped docs
         searchable_text = " ".join([
             document.get('TI', ''),  # Title
-            document.get('TX', ''),  # Text content
-            document.get('SU', ''),  # Subject
+            document.get('TE', ''),  # Text excerpt (limited to 500 chars)
             document.get('AU', ''),  # Author
-            document.get('TE', ''),  # Text excerpt
         ])
+        
+        # Debug logging to see what text we're searching
+        logger.debug(f"Searching text for document {document.get('DN', 'Unknown')}: {searchable_text[:200]}...")
         
         # Find matches in each keyword group
         measure_matches = self._find_keyword_matches(searchable_text, self.measure_keywords)
         product_matches = self._find_keyword_matches(searchable_text, self.product_keywords)
         place_company_matches = self._find_keyword_matches(searchable_text, self.place_company_keywords)
+        
+        # Debug logging for matches
+        logger.debug(f"Document {document.get('DN', 'Unknown')} matches: "
+                    f"Measures: {measure_matches}, Products: {product_matches}, Places: {place_company_matches}")
         
         # Modified logic: Group C (Places/Companies) is MANDATORY, Groups A & B are OPTIONAL
         # At least Group C + one other group must match
@@ -159,7 +171,10 @@ class EURLexTradeDocumentMatcher:
         }
         
         if is_match:
-            logger.debug(f"Document matched: {document.get('DN', 'Unknown')} - "
+            logger.info(f"Document matched: {document.get('DN', 'Unknown')} - "
+                        f"Groups: {groups_with_matches}/3, Keywords: {len(all_matched_keywords)}")
+        else:
+            logger.debug(f"Document NOT matched: {document.get('DN', 'Unknown')} - "
                         f"Groups: {groups_with_matches}/3, Keywords: {len(all_matched_keywords)}")
         
         return is_match, match_details

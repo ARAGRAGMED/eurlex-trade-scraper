@@ -767,6 +767,28 @@ class EURLexTradeScraperDashboard {
             bsToast.show();
         }
     }
+
+    // Check if we're running on Vercel (serverless environment)
+    function isVercelEnvironment() {
+        return window.location.hostname.includes('vercel.app') || 
+               window.location.hostname.includes('vercel.com');
+    }
+    
+    // Show appropriate notices based on environment
+    function showEnvironmentNotices() {
+        if (isVercelEnvironment()) {
+            // Show Vercel notice prominently
+            document.getElementById('vercelNotice').style.display = 'block';
+            document.getElementById('serverlessNotice').style.display = 'none';
+        } else {
+            // Hide both notices on local development
+            document.getElementById('vercelNotice').style.display = 'none';
+            document.getElementById('serverlessNotice').style.display = 'none';
+        }
+    }
+    
+    // Initialize environment notices
+    showEnvironmentNotices();
 }
 
 // Initialize dashboard when DOM is loaded

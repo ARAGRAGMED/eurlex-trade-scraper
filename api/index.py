@@ -4,34 +4,37 @@ Vercel serverless function for the EUR-Lex Trade Scraper FastAPI app.
 
 import os
 import sys
+import json
+import logging
+from datetime import datetime
 from pathlib import Path
 
-# Set up paths for Vercel environment
-if '/var/task' in sys.path[0]:  # Running on Vercel
-    # Vercel environment - add current directory
-    sys.path.insert(0, '/var/task')
-    sys.path.insert(0, '/var/task/src')
-else:
-    # Local development
-    current_dir = Path(__file__).parent
-    project_root = current_dir.parent
-    sys.path.insert(0, str(project_root))
-    sys.path.insert(0, str(project_root / "src"))
+# Add src to Python path for imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-# Set environment variables - create data subdirectory in tmp to match local structure
-os.environ.setdefault('DATA_DIR', '/tmp/data')
+from scraper import EURLexTradeScraper
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Determine data directory based on environment
+if os.environ.get('VERCEL_ENV'):
+    # Vercel deployment - use /tmp/data (temporary, but only option)
+    DATA_DIR = os.environ.get('DATA_DIR', '/tmp/data')
+    logger.info(f"Running on Vercel - using temporary data directory: {DATA_DIR}")
+else:
+    # Local development - use project data folder
+    DATA_DIR = os.environ.get('DATA_DIR', 'data')
+    logger.info(f"Running locally - using project data directory: {DATA_DIR}")
+
+# Ensure data directory exists
+os.makedirs(DATA_DIR, exist_ok=True)
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import HTMLResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
-import logging
-from datetime import datetime
-import json
-
-# Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -49,18 +52,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Create data directory
-data_dir = Path(os.environ['DATA_DIR'])
-data_dir.mkdir(exist_ok=True, parents=True)
-
 # Initialize components with error handling
 scraper = None
 matcher = None
 
 try:
-    from src.scraper import EURLexTradeScraper
     from src.matcher import EURLexTradeDocumentMatcher
-    scraper = EURLexTradeScraper(data_dir=str(data_dir))
+    scraper = EURLexTradeScraper(data_dir=str(Path(DATA_DIR)))
     matcher = EURLexTradeDocumentMatcher()
     logger.info("Successfully imported scraper modules")
 except ImportError as e:
@@ -130,7 +128,7 @@ async def health_check():
         "platform": "Vercel",
         "version": "1.0.0",
         "timestamp": datetime.now().isoformat(),
-        "data_dir": str(data_dir),
+        "data_dir": str(Path(DATA_DIR)),
         "scraper_available": scraper is not None and hasattr(scraper, '_load_results')
     }
 

@@ -3,9 +3,10 @@ EUR-Lex Trade Document Scraper
 Main orchestration logic for scraping and processing EUR-Lex documents.
 """
 
-import json
 import os
-from datetime import datetime, date, timedelta
+import json
+import logging
+from datetime import datetime, date
 from typing import List, Dict, Optional, Tuple
 from pathlib import Path
 import logging
@@ -24,22 +25,44 @@ logger = logging.getLogger(__name__)
 
 
 class EURLexTradeScraper:
-    """Main scraper class for EUR-Lex trade documents."""
+    """Main scraper orchestration class for EUR-Lex trade documents."""
     
-    def __init__(self, data_dir: str = "data"):
-        self.data_dir = Path(data_dir)
-        self.data_dir.mkdir(exist_ok=True)
+    def __init__(self, data_dir: str = None):
+        """
+        Initialize the scraper.
         
-        self.matcher = EURLexTradeDocumentMatcher()
+        Args:
+            data_dir: Directory to store data files. If None, uses environment variable
+                     DATA_DIR or defaults to 'data' for local, '/tmp/data' for Vercel.
+        """
+        # Determine data directory based on environment
+        if data_dir is None:
+            # Check if we're running on Vercel (serverless environment)
+            if os.environ.get('VERCEL_ENV'):
+                # Vercel deployment - use /tmp/data (temporary, but only option)
+                self.data_dir = os.environ.get('DATA_DIR', '/tmp/data')
+                logger.info(f"Running on Vercel - using temporary data directory: {self.data_dir}")
+            else:
+                # Local development - use project data folder
+                self.data_dir = os.environ.get('DATA_DIR', 'data')
+                logger.info(f"Running locally - using project data directory: {self.data_dir}")
+        else:
+            self.data_dir = data_dir
+        
+        # Ensure data directory exists
+        os.makedirs(self.data_dir, exist_ok=True)
+        
+        # Initialize components
         self.web_client = EURLexWebClient()
-        self.current_year = datetime.now().year
+        self.matcher = EURLexTradeDocumentMatcher()
         
         # File paths
-        self.results_file = self.data_dir / f"results-{self.current_year}.json"
-        self.state_file = self.data_dir / "state.json"
+        self.results_file = os.path.join(self.data_dir, 'results-2025.json')
+        self.state_file = os.path.join(self.data_dir, 'state.json')
         
-        # Initialize data files if they don't exist
-        self._initialize_data_files()
+        logger.info(f"EUR-Lex scraper initialized with data directory: {self.data_dir}")
+        logger.info(f"Results file: {self.results_file}")
+        logger.info(f"State file: {self.state_file}")
     
     def _initialize_data_files(self):
         """Initialize data files if they don't exist."""
@@ -289,6 +312,13 @@ class EURLexTradeScraper:
             logger.info(f"Retrieved {len(raw_documents)} raw documents from EUR-Lex")
             
             # Apply keyword matching
+            logger.info(f"Keyword matching: {len(raw_documents)} -> ? matches")
+            
+            # Debug: Log first few documents to see their structure
+            for i, doc in enumerate(raw_documents[:3]):
+                logger.debug(f"Document {i+1}: DN={doc.get('DN', 'N/A')}, TI={doc.get('TI', 'N/A')[:100]}...")
+                logger.debug(f"Document {i+1} text excerpt: {doc.get('TE', 'N/A')[:200]}...")
+            
             matched_documents = self.matcher.filter_documents(raw_documents)
             logger.info(f"Keyword matching: {len(raw_documents)} -> {len(matched_documents)} matches")
             
