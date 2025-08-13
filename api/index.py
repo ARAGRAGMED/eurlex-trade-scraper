@@ -158,8 +158,15 @@ async def get_dashboard_data(
         if product: filters['product'] = product
         if search: filters['search'] = search
         
+        # Debug logging
+        logger.info(f"Dashboard data request - scraper data_dir: {scraper.data_dir}")
+        logger.info(f"Dashboard data request - results_file: {scraper.results_file}")
+        logger.info(f"Dashboard data request - results_file exists: {scraper.results_file.exists()}")
+        
         # Get results
         results = scraper._load_results()
+        logger.info(f"Dashboard data request - loaded {len(results)} results")
+        
         if filters and hasattr(scraper, '_apply_filters'):
             results = scraper._apply_filters(results, filters)
         
@@ -217,7 +224,17 @@ async def trigger_scrape(force_full_2024: bool = False, force_current_year: bool
             return {"status": "error", "message": "Scraper not available"}
         
         logger.info("Manual scrape triggered")
+        logger.info(f"Scrape request - scraper data_dir: {scraper.data_dir}")
+        logger.info(f"Scrape request - results_file: {scraper.results_file}")
+        
         result = scraper.scrape(force_full_2024=force_full_2024, force_current_year=force_current_year)
+        
+        # Log post-scrape state
+        logger.info(f"Scrape completed - results_file exists: {scraper.results_file.exists()}")
+        if scraper.results_file.exists():
+            import os
+            logger.info(f"Scrape completed - file size: {os.path.getsize(scraper.results_file)} bytes")
+        
         return result
     except Exception as e:
         logger.error(f"Error during manual scrape: {e}")
