@@ -230,7 +230,6 @@ async def trigger_scrape(force_full_2024: bool = False, force_current_year: bool
         # Log post-scrape state
         logger.info(f"Scrape completed - results_file exists: {os.path.exists(scraper.results_file)}")
         if os.path.exists(scraper.results_file):
-            import os
             logger.info(f"Scrape completed - file size: {os.path.getsize(scraper.results_file)} bytes")
         
         return result
