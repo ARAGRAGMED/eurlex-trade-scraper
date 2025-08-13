@@ -18,8 +18,8 @@ else:
     sys.path.insert(0, str(project_root))
     sys.path.insert(0, str(project_root / "src"))
 
-# Set environment variables
-os.environ.setdefault('DATA_DIR', '/tmp/eurlex-data')
+# Set environment variables - create data subdirectory in tmp to match local structure
+os.environ.setdefault('DATA_DIR', '/tmp/data')
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import HTMLResponse, Response
