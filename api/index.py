@@ -159,7 +159,7 @@ async def get_dashboard_data(
         # Debug logging
         logger.info(f"Dashboard data request - scraper data_dir: {scraper.data_dir}")
         logger.info(f"Dashboard data request - results_file: {scraper.results_file}")
-        logger.info(f"Dashboard data request - results_file exists: {scraper.results_file.exists()}")
+        logger.info(f"Dashboard data request - results_file exists: {os.path.exists(scraper.results_file)}")
         
         # Get results
         results = scraper._load_results()
@@ -228,8 +228,8 @@ async def trigger_scrape(force_full_2024: bool = False, force_current_year: bool
         result = scraper.scrape(force_full_2024=force_full_2024, force_current_year=force_current_year)
         
         # Log post-scrape state
-        logger.info(f"Scrape completed - results_file exists: {scraper.results_file.exists()}")
-        if scraper.results_file.exists():
+        logger.info(f"Scrape completed - results_file exists: {os.path.exists(scraper.results_file)}")
+        if os.path.exists(scraper.results_file):
             import os
             logger.info(f"Scrape completed - file size: {os.path.getsize(scraper.results_file)} bytes")
         
