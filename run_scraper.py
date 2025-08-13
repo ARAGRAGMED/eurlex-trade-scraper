@@ -33,7 +33,7 @@ def main():
     parser.add_argument(
         "--test-connection",
         action="store_true",
-        help="Test EUR-Lex SOAP connection"
+        help="Test EUR-Lex web connection"
     )
     parser.add_argument(
         "--stats",
@@ -59,7 +59,7 @@ def main():
     scraper = EURLexTradeScraper()
     
     if args.test_connection:
-        print("🔍 Testing EUR-Lex SOAP connection...")
+        print("🔍 Testing EUR-Lex web connection...")
         result = scraper.test_connection()
         print(f"Status: {result['status']}")
         print(f"Message: {result['message']}")

@@ -6,7 +6,7 @@ Main orchestration logic for scraping and processing EUR-Lex documents.
 import os
 import json
 import logging
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from typing import List, Dict, Optional, Tuple
 from pathlib import Path
 import logging
@@ -546,5 +546,9 @@ class EURLexTradeScraper:
             return f"Error exporting data: {str(e)}"
     
     def test_connection(self) -> Dict:
-        """Test EUR-Lex SOAP connection."""
-        return self.soap_client.test_connection()
+        """Test EUR-Lex web connection."""
+        try:
+            return self.web_client.test_connection()
+        except Exception as e:
+            logger.error(f"Error testing connection: {e}")
+            return {"status": "error", "message": f"Connection test failed: {str(e)}"}

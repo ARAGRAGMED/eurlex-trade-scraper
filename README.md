@@ -156,7 +156,7 @@ eurlex-trade-scraper/
 │   ├── matcher.py             # Keyword matching engine
 │   ├── adapters/
 │   │   ├── eurlex_web.py      # EUR-Lex web scraping client
-│   │   └── eurlex_soap.py     # EUR-Lex SOAP client (legacy)
+│   │   └── matcher.py         # Keyword matching logic
 │   └── web/
 │       ├── index.html         # Dashboard UI
 │       └── app.js             # Frontend JavaScript
@@ -260,10 +260,9 @@ vercel --prod
 
 ### Environment Variables
 ```bash
-# Optional: EUR-Lex SOAP credentials (not required for web scraping)
+# Required: EUR-Lex web access credentials
 EURLEX_USERNAME=your_username
 EURLEX_PASSWORD=your_password
-EURLEX_WSDL_URL=https://eur-lex.europa.eu/EURLexWebService?wsdl
 ```
 
 ## 🔧 Configuration

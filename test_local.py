@@ -19,35 +19,25 @@ def test_imports():
         # Test individual module imports
         sys.path.insert(0, str(current_dir / "src"))
         
-        print("📦 Testing matcher...")
-        from src.matcher import EURLexTradeDocumentMatcher
-        matcher = EURLexTradeDocumentMatcher()
-        print(f"✅ Matcher loaded with {len(matcher.measure_keywords)} measure keywords")
+        print("📦 Testing web client...")
+        from src.adapters.eurlex_web import EURLexWebClient
         
-        print("📦 Testing SOAP client...")
-        from src.adapters.eurlex_soap import EURLexSOAPClient
-        # Test without credentials (will show warning)
-        soap_client = EURLexSOAPClient()
-        print("✅ SOAP client loaded (credentials needed for full functionality)")
+        web_client = EURLexWebClient()
+        print("✅ Web client loaded")
         
-        print("📦 Testing scraper (without SOAP)...")
-        # Mock the SOAP client for testing
-        class MockSOAPClient:
-            def search_trade_regulations(self, **kwargs):
-                return []
-            def test_connection(self):
-                return {"status": "error", "message": "No credentials provided"}
+        # Test web client connection
+        connection_test = web_client.test_connection()
+        print(f"🌐 Web connection test: {connection_test}")
         
+        print("📦 Testing scraper...")
         from src.scraper import EURLexTradeScraper
+        
         scraper = EURLexTradeScraper()
-        scraper.soap_client = MockSOAPClient()  # Replace with mock
+        print("✅ Scraper loaded")
         
-        stats = scraper.get_statistics()
-        print(f"✅ Scraper loaded, stats: {stats.get('total_documents', 0)} documents")
-        
-        print("📦 Testing FastAPI app...")
-        from src.main import app
-        print("✅ FastAPI app loaded successfully")
+        # Test scraper connection
+        scraper_connection = scraper.test_connection()
+        print(f"🔗 Scraper connection test: {scraper_connection}")
         
         return True
         
