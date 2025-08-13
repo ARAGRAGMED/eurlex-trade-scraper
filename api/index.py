@@ -210,14 +210,14 @@ async def get_keywords():
         return {"error": str(e)}
 
 @app.post("/api/scrape")
-async def trigger_scrape(force_full_2024: bool = False):
+async def trigger_scrape(force_full_2024: bool = False, force_current_year: bool = False):
     """Trigger a scraping run."""
     try:
         if not scraper or not hasattr(scraper, 'scrape'):
             return {"status": "error", "message": "Scraper not available"}
         
         logger.info("Manual scrape triggered")
-        result = scraper.scrape(force_full_2024=force_full_2024)
+        result = scraper.scrape(force_full_2024=force_full_2024, force_current_year=force_current_year)
         return result
     except Exception as e:
         logger.error(f"Error during manual scrape: {e}")
